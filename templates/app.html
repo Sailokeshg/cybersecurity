@@ -82,6 +82,18 @@
         margin: 20px 0;
         color: #333;
     }
+
+    #addcustomer {
+        display: block;
+        margin: 10px auto;
+        padding: 10px 20px;
+        font-size: 16px;
+        text-decoration: none;
+        background-color: #333;
+        color: white;
+        border-radius: 4px;
+        max-width: 110px;
+    }
 </style>
 <body>
     <h1>{{ title }}</h1>
@@ -90,7 +102,7 @@
         <input type="number" id="search_id" name="search_id" min="1" required>
         <input type="submit" value="Search">
     </form>
-    <a href="/addcustomer" >Add Customer</a>
+    <a id="addcustomer" href="/addcustomer" >Add Customer</a>
     <table border="3">
         <thead>
             <tr bgcolor="lightgrey">

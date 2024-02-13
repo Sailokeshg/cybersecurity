@@ -18,7 +18,7 @@ with open('students.csv', mode='w', newline='') as file:
         phonenumber = generate_random_phone()
         writer.writerow([studentid, name, email, phonenumber])
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  
+app.secret_key= 'secret'
 @app.route('/')
 def index():
     students = []
@@ -26,8 +26,8 @@ def index():
         csv_reader = csv.DictReader(file)
         for row in csv_reader:
             students.append(row)
-    return render_template('app.html', title='Student Database', students=students)
-@app.route('/addstudent', methods=['GET', 'POST'])
+    return render_template('app.html', title='Customer Database', students=students)
+@app.route('/addcustomer', methods=['GET', 'POST'])
 def addstudent():
     if request.method == 'POST':
         studentid = request.form['id']
@@ -51,9 +51,9 @@ def addstudent():
             flash('added student.')
             return redirect(url_for('index'))
 
-    return render_template('addstudent.html', title='Add Student')
+    return render_template('addcustomer.html', title='Add Customer')
 
-@app.route('/search_student', methods=['POST'])
+@app.route('/search_customer', methods=['POST'])
 def search_student():
     studentid = request.form['search_id']
     student = None
@@ -72,9 +72,9 @@ def search_student():
     if student:
         return render_template('search_result.html', title='Search Result', student=student)
     else:
-        return render_template('student_not_found.html', title='Student Not Found')
+        return render_template('customer_not_found.html', title='Customer Not Found')
 
-@app.route('/updatestudent/<int:id>', methods=['GET', 'POST'])
+@app.route('/updatecustomer/<int:id>', methods=['GET', 'POST'])
 def updatestudent(id):
     students = []
     with open('students.csv', mode='r') as file:
@@ -96,12 +96,12 @@ def updatestudent(id):
                 flash('updated student.')
                 return redirect(url_for('index'))
 
-            return render_template('updatestudent.html', title='Update Student', student=student)
+            return render_template('updatecustomer.html', title='Update Customer', student=student)
 
     flash('Student not found.')
     return redirect(url_for('index'))
 
-@app.route('/deletestudent/<int:id>')
+@app.route('/deletecustomer/<int:id>')
 def deletestudent(id):
 
     students = []

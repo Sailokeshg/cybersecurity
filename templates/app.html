@@ -85,12 +85,12 @@
 </style>
 <body>
     <h1>{{ title }}</h1>
-    <form method="POST" action="/search_student">
-        <label for="search_id">Search Student by ID:</label>
+    <form method="POST" action="/search_customer">
+        <label for="search_id">Search Customer by ID:</label>
         <input type="number" id="search_id" name="search_id" min="1" required>
         <input type="submit" value="Search">
     </form>
-    <a href="/addstudent" >Add Student</a>
+    <a href="/addcustomer" >Add Customer</a>
     <table border="3">
         <thead>
             <tr bgcolor="lightgrey">
@@ -109,8 +109,8 @@
                     <td>{{ student['Email'] }}</td>
                     <td>{{ student['Phonenumber'] }}</td>
                     <td>
-                        <a href="/updatestudent/{{ student['id'] }}">Update</a>
-                        <a href="/deletestudent/{{ student['id'] }}">Delete</a>
+                        <a href="/updatecustomer/{{ student['id'] }}">Update</a>
+                        <a href="/deletecustomer/{{ student['id'] }}">Delete</a>
                     </td>
                 </tr>
             {% endfor %}

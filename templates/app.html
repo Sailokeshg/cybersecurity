@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>main</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    form {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    label {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    input[type="number"] {
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    input[type="submit"] {
+        padding: 8px 16px;
+        font-size: 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    a {
+        display: inline-block;
+        margin: 10px 0;
+        padding: 10px 20px;
+        font-size: 16px;
+        text-decoration: none;
+        background-color: #333;
+        color: white;
+        border-radius: 4px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    p {
+        text-align: center;
+        margin: 20px 0;
+        color: #333;
+    }
+</style>
+<body>
+    <h1>{{ title }}</h1>
+    <form method="POST" action="/search_student">
+        <label for="search_id">Search Student by ID:</label>
+        <input type="number" id="search_id" name="search_id" min="1" required>
+        <input type="submit" value="Search">
+    </form>
+    <a href="/addstudent" >Add Student</a>
+    <table border="3">
+        <thead>
+            <tr bgcolor="lightgrey">
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phonenumber</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+                <tr>
+                    <td>{{ student['id'] }}</td>
+                    <td>{{ student['Name'] }}</td>
+                    <td>{{ student['Email'] }}</td>
+                    <td>{{ student['Phonenumber'] }}</td>
+                    <td>
+                        <a href="/updatestudent/{{ student['id'] }}">Update</a>
+                        <a href="/deletestudent/{{ student['id'] }}">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>{{ get_flashed_messages() }}</p>
+</body>
+</html>
+

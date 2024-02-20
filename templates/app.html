@@ -103,9 +103,9 @@
         <input type="submit" value="Search">
     </form>
     <a id="addcustomer" href="/addcustomer" >Add Customer</a>
-    <table border="3">
+    <table>
         <thead>
-            <tr bgcolor="lightgrey">
+            <tr>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Email</th>
@@ -114,15 +114,15 @@
             </tr>
         </thead>
         <tbody>
-            {% for student in students %}
+            {% for customer in customers %}
                 <tr>
-                    <td>{{ student['id'] }}</td>
-                    <td>{{ student['Name'] }}</td>
-                    <td>{{ student['Email'] }}</td>
-                    <td>{{ student['Phonenumber'] }}</td>
+                    <td>{{ customer['id'] }}</td>
+                    <td>{{ customer['Name'] }}</td>
+                    <td>{{ customer['Email'] }}</td>
+                    <td>{{ customer['Phonenumber'] }}</td>
                     <td>
-                        <a href="/updatecustomer/{{ student['id'] }}">Update</a>
-                        <a href="/deletecustomer/{{ student['id'] }}">Delete</a>
+                        <a href="/updatecustomer/{{ customer['id'] }}">Update</a>
+                        <a href="/deletecustomer/{{ customer['id'] }}">Delete</a>
                     </td>
                 </tr>
             {% endfor %}

@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>{{ title }}</h1>
-    {% if student %}
+    {% if customer %}
     <table border="2">
         <thead>
             <tr>
@@ -17,10 +17,10 @@
         </thead>
         <tbody>
             <tr>
-                <td>{{ student['id'] }}</td>
-                <td>{{ student['Name'] }}</td>
-                <td>{{ student['Email'] }}</td>
-                <td>{{ student['Phonenumber'] }}</td>
+                <td>{{ customer['id'] }}</td>
+                <td>{{ customer['Name'] }}</td>
+                <td>{{ customer['Email'] }}</td>
+                <td>{{ customer['Phonenumber'] }}</td>
             </tr>
         </tbody>
     </table>

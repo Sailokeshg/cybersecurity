@@ -1,127 +1,117 @@
-import csv
 import random
 import string
-from faker import Faker
-from flask import Flask
 from flask import Flask, render_template, request, redirect, url_for, flash
-import csv
+import mysql.connector
+from faker import Faker
+
+app = Flask(__name__)
+app.secret_key = 'secret'
+
+# Configure MySQL
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_DB'] = 'cybersecurity'
+
 def generate_random_phone():
     return ''.join(random.choice(string.digits) for _ in range(10))
+
 fake = Faker()
-with open('students.csv', mode='w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(['id', 'Name', 'Email', 'Phonenumber'])
-    for i in range(1, 1001):
-        studentid = i
-        name = fake.name()
-        email = fake.email()
-        phonenumber = generate_random_phone()
-        writer.writerow([studentid, name, email, phonenumber])
-app = Flask(__name__)
-app.secret_key= 'secret'
+
+db = mysql.connector.connect(
+    host=app.config['MYSQL_HOST'],
+    user=app.config['MYSQL_USER'],
+    password=app.config['MYSQL_PASSWORD'],
+    database=app.config['MYSQL_DB']
+)
+
+cursor = db.cursor(dictionary=True)
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS customer (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        Name VARCHAR(255) NOT NULL,
+        Email VARCHAR(255) NOT NULL,
+        Phonenumber VARCHAR(10) NOT NULL
+    )
+""")
+
+db.commit()
+
+for i in range(1, 1001):
+    name = fake.name()
+    email = fake.email()
+    phonenumber = generate_random_phone()
+    cursor.execute("INSERT INTO customer (Name, Email, Phonenumber) VALUES (%s, %s, %s)", (name, email, phonenumber))
+
+db.commit()
+
 @app.route('/')
 def index():
-    students = []
-    with open('students.csv', mode='r') as file:
-        csv_reader = csv.DictReader(file)
-        for row in csv_reader:
-            students.append(row)
-    return render_template('app.html', title='Customer Database', students=students)
+    cursor.execute("SELECT * FROM customers")
+    customers = cursor.fetchall()
+    return render_template('app.html', title='Customer Database', customers=customers)
+
 @app.route('/addcustomer', methods=['GET', 'POST'])
-def addstudent():
+def addcustomer():
     if request.method == 'POST':
-        studentid = request.form['id']
         name = request.form['name']
+        customer_id = request.form['id']
         email = request.form['email']
         phonenumber = request.form['phonenumber']
 
-        if not studentid.isdigit():
-            flash('ID should contain only integers.')
-        else:
-            studentid = int(studentid)
-            with open('students.csv', mode='r') as file:
-                csv_reader = csv.reader(file)
-                for row in csv_reader:
-                    if str(studentid) == row[0]:
-                        flash('ID already exists.')
-                        return redirect(url_for('addstudent'))
-            with open('students.csv', mode='a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow([studentid, name, email, phonenumber])
-            flash('added student.')
-            return redirect(url_for('index'))
+        cursor.execute("INSERT INTO customers (id, Name, Email, Phonenumber) VALUES (%s, %s, %s, %s)", (customer_id, name, email, phonenumber))
+        db.commit()
+
+        return redirect(url_for('index'))
 
     return render_template('addcustomer.html', title='Add Customer')
 
 @app.route('/search_customer', methods=['POST'])
-def search_student():
-    studentid = request.form['search_id']
-    student = None
-    with open('students.csv', mode='r') as file:
-        csv_reader = csv.reader(file)
-        for row in csv_reader:
-            if studentid == row[0]:
-                student = {
-                    'id': row[0],
-                    'Name': row[1],
-                    'Email': row[2],
-                    'Phonenumber': row[3]
-                }
-                break
+def search_customer():
+    customer_id = request.form['search_id']
+    
+    cursor.execute("SELECT * FROM customers WHERE id = %s", (customer_id,))
+    customer = cursor.fetchone()
 
-    if student:
-        return render_template('search_result.html', title='Search Result', student=student)
+    if customer:
+        return render_template('search_result.html', title='Search Result', customer=customer)
     else:
         return render_template('customer_not_found.html', title='Customer Not Found')
 
 @app.route('/updatecustomer/<int:id>', methods=['GET', 'POST'])
-def updatestudent(id):
-    students = []
-    with open('students.csv', mode='r') as file:
-        csv_reader = csv.DictReader(file)
-        for row in csv_reader:
-            students.append(row)
-    for student in students:
-        if int(student['id']) == id:
-            if request.method == 'POST':
-                student['Name'] = request.form['name']
-                student['Email'] = request.form['email']
-                student['Phonenumber'] = request.form['phonenumber']
-                with open('students.csv', mode='w', newline='') as file:
-                    fieldnames = ['id', 'Name', 'Email', 'Phonenumber']
-                    writer = csv.DictWriter(file, fieldnames=fieldnames)
-                    writer.writeheader()
-                    writer.writerows(students)
+def updatecustomer(id):
+    cursor.execute("SELECT * FROM customers WHERE id = %s", (id,))
+    customer = cursor.fetchone()
 
-                flash('updated student.')
-                return redirect(url_for('index'))
+    if not customer:
+        flash('Customer not found.')
+        return redirect(url_for('index'))
 
-            return render_template('updatecustomer.html', title='Update Customer', student=student)
+    if request.method == 'POST':
+        customer['Name'] = request.form['name']
+        customer['Email'] = request.form['email']
+        customer['Phonenumber'] = request.form['phonenumber']
 
-    flash('Student not found.')
-    return redirect(url_for('index'))
+        cursor.execute("UPDATE customers SET Name = %s, Email = %s, Phonenumber = %s WHERE id = %s",
+                       (customer['Name'], customer['Email'], customer['Phonenumber'], id))
+        db.commit()
+
+        
+        return redirect(url_for('index'))
+
+    return render_template('updatecustomer.html', title='Update Customer', customer=customer)
 
 @app.route('/deletecustomer/<int:id>')
-def deletestudent(id):
+def deletecustomer(id):
+    cursor.execute("DELETE FROM customers WHERE id = %s", (id,))
+    db.commit()
 
-    students = []
-    with open('students.csv', mode='r') as file:
-        csv_reader = csv.DictReader(file)
-        for row in csv_reader:
-            students.append(row)
+    return redirect(url_for('index'))
 
-    for student in students:
-        if int(student['id']) == id:
-            students.remove(student)
 
-            with open('students.csv', mode='w', newline='') as file:
-                fieldnames = ['id', 'Name', 'Email', 'Phonenumber']
-                writer = csv.DictWriter(file, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(students)
-
-            flash('deleted.')
-            return redirect(url_for('index'))
+if __name__ == '__main__':
+    app.run(debug=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
